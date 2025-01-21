@@ -1,0 +1,1 @@
+Find the current population of a city that is mentioned in the students.txt file that begins with the letter 'H'. Write the result as a JSON object with the fields 'city' and 'population', whose value is a number. The JSON should be stored in the file "query2.json".

@@ -1,0 +1,3 @@
+Find the hobbies of all students. The result should be JSON array
+where each object in the array has one field, ‘hobby', whose value is
+the name of the hobby. Store the JSON in the file "query1.json".

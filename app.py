@@ -1,0 +1,211 @@
+import streamlit as st
+import json
+import os
+from my_workflow import run_pipeline
+
+# A list of the possible query files we have:
+AVAILABLE_QUERIES = ["query1.txt", "query2.txt", "query3.txt", "query4.txt"]
+
+# A list of our two resource files that we allow editing
+RESOURCE_FILES = ["grades.csv", "students.txt"]
+
+def main():
+    st.title("Nir Elkayam's LangChain Demo")
+
+    # ---- New Description for the user ----
+    st.markdown(
+        """
+        **Welcome to my LangChain Demo!**
+
+        This application demonstrates a **multi-step, agent-based system** powered by [LangChain](https://github.com/hwchase17/langchain). 
+        Each *query* file (e.g., `query1.txt`) contains **instructions** or a **prompt** that the pipeline will interpret. 
+        Behind the scenes, the system uses an **LLM** and other tools to **plan** which "tool" or function to call next, it can, among other things:
+        - Generate Python code to analyze a CSV file, 
+        - Execute that code and capture the result, 
+        - Perform text analysis on files, 
+        - Search the web for information using duckduckgo api,
+        - Finalize an answer once it has all the information it needs.
+
+        **How to use this app**:
+        1. **Pick** one of the available query files from the dropdown.
+        2. **View or edit** the query file’s text in the text area (press "Save Query File" to confirm changes).
+        3. (Optional) **Edit** the input JSON below if you want to change the contents of files the pipeline can access.
+        4. Click **"Run Pipeline"** to see how the LLM decides to handle the query. The logs and final state are shown in a collapsible 
+           section, and any newly created or modified files will appear below.
+        5. Duo to the fact that we are constantly generating new code, the pipeline may not always produce a perfect result.
+           In that case, give it another shot and try to run the pipeline again.
+
+        *Note: All changes you make happen only in your current session, so feel free to experiment!*
+        """,
+        unsafe_allow_html=True
+    )
+
+
+    # ---------------------------
+    # 1) Pick and Edit Query File
+    # ---------------------------
+
+    selected_query = st.selectbox("Pick a query file to load:", AVAILABLE_QUERIES)
+    
+    default_query_content = ""
+    if os.path.exists(selected_query):
+        with open(selected_query, "r", encoding="utf-8") as f:
+            default_query_content = f.read()
+    else:
+        default_query_content = f"{selected_query} not found."
+
+    edited_query_content = st.text_area(
+        label=f"Edit the content of {selected_query}:",
+        value=default_query_content,
+        height=200
+    )
+
+    if st.button("Save Query File"):
+        with open(selected_query, "w", encoding="utf-8") as f:
+            f.write(edited_query_content)
+        st.success(f"Saved changes to {selected_query}.")
+
+    # ------------------------------
+    # 2) Default JSON (input.json)
+    # ------------------------------
+    default_json = {
+        "query_name": selected_query,
+        "file_resources": [
+            {
+                "file_name": "grades.csv",
+                "description": (
+                    "A csv file describing students and their grades. "
+                    "The first line contains the columns (field names) of each following row. "
+                    "They are: First, Last, University-Year, Class, Grade. "
+                    "An example row is: Shalom, Levi, 3, Calculus, 93.5"
+                )
+            },
+            {
+                "file_name": "students.txt",
+                "description": (
+                    "A text file containing information on some of the students, "
+                    "including his or her aspirations, favorite city, and hobbies."
+                )
+            }
+        ]
+    }
+
+    default_json_str = json.dumps(default_json, indent=4)
+    user_json_str = st.text_area(
+        "Edit your input JSON here (for input.json):",
+        value=default_json_str,
+        height=200
+    )
+
+    # --------------------------------------------
+    # 3) Let the user view/edit resource files too
+    # --------------------------------------------
+
+    st.subheader("Resource Files")
+    st.write(
+        "Here you can view or edit the content of `grades.csv` or `students.txt`."
+        "If you choose to edit them, Don't forget to edit the `input.json` accordingly."
+    )
+
+    selected_resource = st.selectbox("Pick a resource file to load:", RESOURCE_FILES)
+
+    default_resource_content = ""
+    if os.path.exists(selected_resource):
+        with open(selected_resource, "r", encoding="utf-8") as f:
+            default_resource_content = f.read()
+    else:
+        default_resource_content = f"{selected_resource} not found."
+
+    edited_resource_content = st.text_area(
+        label=f"Edit the content of {selected_resource}:",
+        value=default_resource_content,
+        height=200
+    )
+
+    if st.button("Save Resource File"):
+        with open(selected_resource, "w", encoding="utf-8") as f:
+            f.write(edited_resource_content)
+        st.success(f"Saved changes to {selected_resource}.")
+
+
+    # --------------------------------------------
+    # 4) Run the pipeline
+    # --------------------------------------------
+    if st.button("Run Pipeline"):
+        try:
+            input_data = json.loads(user_json_str)
+            final_state = run_pipeline(input_data)
+
+            with st.expander("Click to see Logs / Final State", expanded=False):
+                st.subheader("Final State")
+                st.json(final_state)
+                st.write("**created_files** =", final_state.get("created_files", "No created_files in final_state"))
+
+                if "program_output" in final_state:
+                    st.subheader("Program Output")
+                    st.text(final_state["program_output"])
+
+            st.subheader("Created / Modified Files")
+            if "created_files" in final_state:
+                file_list = final_state["created_files"]
+                unique_files = []
+                for fname in file_list:
+                    if fname not in unique_files:
+                        unique_files.append(fname)
+                for filename in unique_files:
+                    display_file_contents(filename)
+            else:
+                st.write("No 'created_files' key found in final_state.")
+
+        except json.JSONDecodeError as e:
+            st.error(f"Invalid JSON: {e}")
+
+
+def display_file_contents(filename: str):
+    if os.path.exists(filename):
+        st.markdown(f"**{filename}**")
+        if filename.endswith(".py"):
+            with open(filename, "r") as f:
+                code = f.read()
+            st.code(code, language="python")
+            st.download_button(
+                label=f"Download {filename}",
+                data=code,
+                file_name=filename,
+                mime="text/x-python",
+                key=f"download_{filename}"
+            )
+
+        elif filename.endswith(".json"):
+            with open(filename, "r") as f:
+                data = f.read()
+            st.json(data)
+            st.download_button(
+                label=f"Download {filename}",
+                data=data,
+                file_name=filename,
+                mime="application/json",
+                key=f"download_{filename}"
+            )
+
+        elif filename.endswith(".txt") or filename.endswith(".csv"):
+            with open(filename, "r") as f:
+                text = f.read()
+            st.text(text)
+            st.download_button(
+                label=f"Download {filename}",
+                data=text,
+                file_name=filename,
+                mime="text/plain",
+                key=f"download_{filename}"
+            )
+        else:
+            with open(filename, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+            st.text(content)
+    else:
+        st.warning(f"File not found: {filename}")
+
+
+if __name__ == "__main__":
+    main()

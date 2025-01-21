@@ -1,0 +1,1 @@
+Generate a Python program that finds the average grade of all the students. The result should be represented as a JSON object with one field, 'average_grade', whose value is a number, and written to the file "query3.json". The Python program itself should be stored in the file "query3.py". Before finishing, execute the program stored in the file "query3.py".
