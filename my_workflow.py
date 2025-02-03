@@ -79,22 +79,45 @@ class Resource:
     
 
 class QueryParser:
+  def __init__(self, input_data):
+        self.input_data = input_data
 
-  def parse_query_name(self, input_data):
-    # Parse query name. Appears in the exercise in two different ways.
-    for key in ('query-name', 'query_name'):
-      if key in input_data:
-        return input_data[key]
-    raise KeyError("Could not find the query name")
-
+  def parse_query_name(self):
+        for key in ('query-name', 'query_name'):
+            if key in self.input_data:
+                return self.input_data[key]
+        raise KeyError("Could not find the query name")
+  
   def parse_query_content(self, query_path):
-    with open(query_path) as f:
-      return f.read()
+        # If the user provided "query_content", skip reading from disk
+        if "query_content" in self.input_data and self.input_data["query_content"] is not None:
+            return self.input_data["query_content"]
 
-  def parse_query(self, input_data):
-    query_name = self.parse_query_name(input_data)
-    query_content = self.parse_query_content(query_name)
-    return Query(query_name, query_content)
+        # Otherwise, read the file from disk
+        with open(query_path, "r", encoding="utf-8") as f:
+            return f.read()
+        
+  def parse_query(self):
+        query_name = self.parse_query_name()
+        query_content = self.parse_query_content(query_name)
+        return Query(query_name, query_content)
+
+
+  # def parse_query_name(self, input_data):
+  #   # Parse query name. Appears in the exercise in two different ways.
+  #   for key in ('query-name', 'query_name'):
+  #     if key in input_data:
+  #       return input_data[key]
+  #   raise KeyError("Could not find the query name")
+
+  # def parse_query_content(self, query_path):
+  #   with open(query_path) as f:
+  #     return f.read()
+
+  # def parse_query(self, input_data):
+  #   query_name = self.parse_query_name(input_data)
+  #   query_content = self.parse_query_content(query_name)
+  #   return Query(query_name, query_content)
 
 
 class ResourcesParser:
@@ -106,19 +129,47 @@ class ResourcesParser:
       if key in resource_data:
         name = resource_data[key]
         description = resource_data['description']
-        return Resource(name, description)
+        content = resource_data.get("content", None)
+        res = Resource(name, description)
+        if content is not None:
+          res.set_content(content)
+
+        return res
+        # return Resource(name, description)
     raise KeyError("Could not find the name of the resource")
 
   def load_resources_contents(self, resources):
+    import os
     for res in resources:
-      with open(res.name) as f:
-        if res.name.endswith('csv'):
-          df = pd.read_csv(f)
-          res.set_content(f)
-          columns_index = json.dumps({column: i for i, column in enumerate(list(df.columns))})
-          res.description += columns_index
-        else:
-          res.set_content(f.read())
+      if res.content is not None:
+        continue
+       
+      if os.path.exists(res.name):
+         with open(res.name, "r", encoding="utf-8") as f:
+            if res.name.endswith('csv'):
+              df = pd.read_csv(f)
+              # Append the columns index to the resource description
+              columns_index = json.dumps({column: i for i, column in enumerate(df.columns)})
+              res.description += columns_index   
+              # Go back to the start of the file to read the raw CSV text for res.content
+              f.seek(0)
+              csv_text = f.read()
+              res.set_content(csv_text)
+            else:
+              res.set_content(f.read())
+      else:
+         res.set_content("")
+                 
+
+    # for res in resources:
+    #   with open(res.name) as f:
+    #     if res.name.endswith('csv'):
+    #       df = pd.read_csv(f)
+    #       res.set_content(f)
+    #       columns_index = json.dumps({column: i for i, column in enumerate(list(df.columns))})
+    #       res.description += columns_index
+    #     else:
+    #       res.set_content(f.read())
 
   def parse_resources(self, input_data):
     resources = [self.parse_resource(res) for res in input_data['file_resources']]
@@ -130,11 +181,14 @@ class InputParser:
 
   def __init__(self, input_data):
     self.input_data = input_data
-    self.query_parser = QueryParser()
+    # self.query_parser = QueryParser()
+    self.query_parser = QueryParser(input_data)
     self.resources_parser = ResourcesParser()
 
   def parse_query(self):
-    return self.query_parser.parse_query(self.input_data)
+    # return self.query_parser.parse_query(self.input_data)
+    return self.query_parser.parse_query()
+  
 
   def parse_resources(self):
     return self.resources_parser.parse_resources(self.input_data)
