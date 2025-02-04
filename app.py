@@ -10,6 +10,15 @@ AVAILABLE_QUERIES = ["query1.txt", "query2.txt", "query3.txt", "query4.txt"]
 RESOURCE_FILES = ["grades.csv", "students.txt"]
 
 def main():
+    # Show the deployed commit hash for debugging
+    if os.path.exists("version.txt"):
+        with open("version.txt", "r", encoding="utf-8") as f:
+            commit_hash = f.read().strip()
+        st.info(f"**Deployed commit:** {commit_hash}")
+        
+    if "file_contents" not in st.session_state:
+        st.session_state["file_contents"] = {}
+
     st.title("Nir Elkayam's LangChain Demo")
 
     # ---- New Description for the user ----
@@ -61,9 +70,11 @@ def main():
     )
 
     if st.button("Save Query File"):
-        with open(selected_query, "w", encoding="utf-8") as f:
-            f.write(edited_query_content)
-        st.success(f"Saved changes to {selected_query}.")
+        st.session_state["file_contents"][selected_query] = edited_query_content
+        # with open(selected_query, "w", encoding="utf-8") as f:
+        #     f.write(edited_query_content)
+        st.success(f"Saved changes to {selected_query} (session-only).")
+        # st.success(f"Saved changes to {selected_query}.")
 
     # ------------------------------
     # 2) Default JSON (input.json)
@@ -123,17 +134,62 @@ def main():
     )
 
     if st.button("Save Resource File"):
-        with open(selected_resource, "w", encoding="utf-8") as f:
-            f.write(edited_resource_content)
-        st.success(f"Saved changes to {selected_resource}.")
-
+        # with open(selected_resource, "w", encoding="utf-8") as f:
+        #     f.write(edited_resource_content)
+        # st.success(f"Saved changes to {selected_resource}.")
+        st.session_state["file_contents"][selected_resource] = edited_resource_content
+        st.success(f"Saved changes to {selected_resource} (session-only).")
 
     # --------------------------------------------
     # 4) Run the pipeline
+
+
+
     # --------------------------------------------
+    # if st.button("Run Pipeline"):
+    #     try:
+    #         input_data = json.loads(user_json_str)
+    #         final_state = run_pipeline(input_data)
+
+    #         with st.expander("Click to see Logs / Final State", expanded=False):
+    #             st.subheader("Final State")
+    #             st.json(final_state)
+    #             st.write("**created_files** =", final_state.get("created_files", "No created_files in final_state"))
+
+    #             if "program_output" in final_state:
+    #                 st.subheader("Program Output")
+    #                 st.text(final_state["program_output"])
+
+    #         st.subheader("Created / Modified Files")
+    #         if "created_files" in final_state:
+    #             file_list = final_state["created_files"]
+    #             unique_files = []
+    #             for fname in file_list:
+    #                 if fname not in unique_files:
+    #                     unique_files.append(fname)
+    #             for filename in unique_files:
+    #                 display_file_contents(filename)
+    #         else:
+    #             st.write("No 'created_files' key found in final_state.")
+
+    #     except json.JSONDecodeError as e:
+    #         st.error(f"Invalid JSON: {e}")
+
+
+
     if st.button("Run Pipeline"):
         try:
             input_data = json.loads(user_json_str)
+            if selected_query in st.session_state["file_contents"]:
+                input_data["query_content"] = st.session_state["file_contents"][selected_query]
+            # Inject any session-edited files into input_data
+            if "file_contents" in st.session_state and "file_resources" in input_data:
+                for resource in input_data["file_resources"]:
+                    fname = resource.get("file_name") or resource.get("name")
+                    if fname in st.session_state["file_contents"]:
+                        resource["content"] = st.session_state["file_contents"][fname]
+            
+            # Run the pipeline with our updated input data
             final_state = run_pipeline(input_data)
 
             with st.expander("Click to see Logs / Final State", expanded=False):
@@ -160,6 +216,8 @@ def main():
         except json.JSONDecodeError as e:
             st.error(f"Invalid JSON: {e}")
 
+
+        
 
 def display_file_contents(filename: str):
     if os.path.exists(filename):
