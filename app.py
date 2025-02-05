@@ -117,13 +117,29 @@ def main():
 
     selected_resource = st.selectbox("Pick a resource file to load:", RESOURCE_FILES)
 
+    # default_resource_content = ""
+    # if os.path.exists(selected_resource):
+    #     with open(selected_resource, "r", encoding="utf-8") as f:
+    #         default_resource_content = f.read()
+    # else:
+    #     default_resource_content = f"{selected_resource} not found."
+    
     default_resource_content = ""
-    if os.path.exists(selected_resource):
-        with open(selected_resource, "r", encoding="utf-8") as f:
-            default_resource_content = f.read()
+    # First check if we have a session-based edit saved
+    if selected_resource in st.session_state["file_contents"]:
+        default_resource_content = st.session_state["file_contents"][selected_resource]
     else:
-        default_resource_content = f"{selected_resource} not found."
+        # Otherwise, read from disk as a fallback
+        if os.path.exists(selected_resource):
+            with open(selected_resource, "r", encoding="utf-8") as f:
+                default_resource_content = f.read()
+        else:
+            default_resource_content = f"{selected_resource} not found."
+        
 
+
+
+    
     edited_resource_content = st.text_area(
         label=f"Edit the content of {selected_resource}:",
         value=default_resource_content,
