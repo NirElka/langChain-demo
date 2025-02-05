@@ -71,10 +71,7 @@ def main():
 
     if st.button("Save Query File"):
         st.session_state["file_contents"][selected_query] = edited_query_content
-        # with open(selected_query, "w", encoding="utf-8") as f:
-        #     f.write(edited_query_content)
         st.success(f"Saved changes to {selected_query} (session-only).")
-        # st.success(f"Saved changes to {selected_query}.")
 
     # ------------------------------
     # 2) Default JSON (input.json)
@@ -134,47 +131,11 @@ def main():
     )
 
     if st.button("Save Resource File"):
-        # with open(selected_resource, "w", encoding="utf-8") as f:
-        #     f.write(edited_resource_content)
-        # st.success(f"Saved changes to {selected_resource}.")
         st.session_state["file_contents"][selected_resource] = edited_resource_content
         st.success(f"Saved changes to {selected_resource} (session-only).")
 
     # --------------------------------------------
     # 4) Run the pipeline
-
-
-
-    # --------------------------------------------
-    # if st.button("Run Pipeline"):
-    #     try:
-    #         input_data = json.loads(user_json_str)
-    #         final_state = run_pipeline(input_data)
-
-    #         with st.expander("Click to see Logs / Final State", expanded=False):
-    #             st.subheader("Final State")
-    #             st.json(final_state)
-    #             st.write("**created_files** =", final_state.get("created_files", "No created_files in final_state"))
-
-    #             if "program_output" in final_state:
-    #                 st.subheader("Program Output")
-    #                 st.text(final_state["program_output"])
-
-    #         st.subheader("Created / Modified Files")
-    #         if "created_files" in final_state:
-    #             file_list = final_state["created_files"]
-    #             unique_files = []
-    #             for fname in file_list:
-    #                 if fname not in unique_files:
-    #                     unique_files.append(fname)
-    #             for filename in unique_files:
-    #                 display_file_contents(filename)
-    #         else:
-    #             st.write("No 'created_files' key found in final_state.")
-
-    #     except json.JSONDecodeError as e:
-    #         st.error(f"Invalid JSON: {e}")
-
 
 
     if st.button("Run Pipeline"):
