@@ -103,22 +103,6 @@ class QueryParser:
         return Query(query_name, query_content)
 
 
-  # def parse_query_name(self, input_data):
-  #   # Parse query name. Appears in the exercise in two different ways.
-  #   for key in ('query-name', 'query_name'):
-  #     if key in input_data:
-  #       return input_data[key]
-  #   raise KeyError("Could not find the query name")
-
-  # def parse_query_content(self, query_path):
-  #   with open(query_path) as f:
-  #     return f.read()
-
-  # def parse_query(self, input_data):
-  #   query_name = self.parse_query_name(input_data)
-  #   query_content = self.parse_query_content(query_name)
-  #   return Query(query_name, query_content)
-
 
 class ResourcesParser:
 
@@ -161,15 +145,6 @@ class ResourcesParser:
          res.set_content("")
                  
 
-    # for res in resources:
-    #   with open(res.name) as f:
-    #     if res.name.endswith('csv'):
-    #       df = pd.read_csv(f)
-    #       res.set_content(f)
-    #       columns_index = json.dumps({column: i for i, column in enumerate(list(df.columns))})
-    #       res.description += columns_index
-    #     else:
-    #       res.set_content(f.read())
 
   def parse_resources(self, input_data):
     resources = [self.parse_resource(res) for res in input_data['file_resources']]
@@ -318,14 +293,12 @@ def plan(state):
     response = llm(prompt)
     state['llm_invocations'] += 1
 
-    # parsed_response = json.loads(response)
     # Post-process response to remove possible code fences
     # Strip whitespace
     # Clean and extract JSON
     response = response.strip().replace("```json", "").replace("```", "").strip("`").strip()
     json_match = re.search(r'\{.*\}', response, re.DOTALL)
     # Remove surrounding triple backticks and 'json' hint if present
-    # response = response.replace("```json", "").replace("```", "").strip("`").strip()
 
     # Check if the response is valid JSON before parsing
     if json_match:
@@ -390,22 +363,42 @@ def generate_analysis_program(state) -> str:
     params = ["analysis_request", "input_file", "columns", "row_example", "output_file", "output_format"]
     params_values = [analysis_request, input_file, columns, row_example, output_file, output_format]
     log_param(state, params, params_values)
-
+    
     # Create a prompt template
+    # prompt_template = """
+    # I want you to write me a Python script that analyses data from a file.
+
+    # The file I want the script to analyze is called {input_file}.
+    # It is a `.csv` file with the following columns: {columns}.
+    # For example, the row of data (after the column names row): {row_example}.
+
+    # Here is the instructions for the analysis itself.
+    # Your Python script should reflect these requirements:
+    # {analysis_request}
+    # The desired output format is {output_format}.
+    # The last line of your code should be printing the results
+
+    # The Python script should be saved in {output_file}
+    # """
     prompt_template = """
-    I want you to write me a Python script that analyses data from a file.
+    You have two strings in memory, `csv_content` for the CSV data (grades.csv), and
+    `students_txt_str` for the text data (students.txt). **Do NOT** open these files from disk.
 
-    The file I want the script to analyze is called {input_file}.
-    It is a `.csv` file with the following columns: {columns}.
-    For example, the row of data (after the column names row): {row_example}.
+    Instead, parse them from these two variables. For example, use Python's `csv` or
+    `pandas` with an in-memory buffer (e.g. `io.StringIO`) for `csv_content`, and just
+    split or read lines from `students_txt_str`.
 
-    Here is the instructions for the analysis itself.
-    Your Python script should reflect these requirements:
-    {analysis_request}
-    The desired output format is {output_format}.
-    The last line of your code should be printing the results
+    Your task:
+    - Columns in the CSV: {columns}
+    - Example row: {row_example}
+    - Analysis requirements: {analysis_request}
+    - Output format: {output_format}
+    - The script's name: {output_file}
 
-    The Python script should be saved in {output_file}
+    At the end, print(...) the final result. Again, do NOT open any physical file on disk.
+    Use the two in-memory variables:
+    1) csv_content for the CSV
+    2) students_txt_str for the text file
     """
 
     # Create a prompt
@@ -422,9 +415,47 @@ def generate_analysis_program(state) -> str:
     response = llm(prompt)
 
     code = clean_code(response)
-    # Save Python file
+
+
+    csv_content = ""
+    students_text = ""
+
+    for (r_name, r_desc, r_data) in state["resources"]:
+       if r_name == input_file:  # input_file is "grades.csv" or whatever the pipeline decided
+          csv_content = r_data
+       elif r_name == "students.txt":
+          students_text = r_data
+       
+       
+          break
+    # 2) Build a small code snippet that sets a global variable `csv_content`
+    #    in the final script. We'll rely on the LLM's code to reference csv_content
+    injection_snippet = f"""
+    # --INJECTED BY PIPELINE--
+    if __name__ == "__main__":
+       csv_content = \"\"\"{csv_content}\"\"\"
+       students_txt_str = \"\"\"{students_text}\"\"\"
+      # We'll define a global variable for the script to pick up:
+      globals()['csv_content'] = csv_content
+      globals()["students_txt_str"] = students_txt_str
+    """
+    # 3) Combine the LLM-generated code with our snippet
+    combined_code = code + "\\n" + injection_snippet
+
+
+    # 4) Write combined_code to the output_file instead of the raw code
     with open(output_file, 'w') as f:
-      f.write(code)
+       f.write(combined_code)
+       
+    log(state, combined_code)
+
+
+   
+
+
+    # # Save Python file
+    # with open(output_file, 'w') as f:
+    #   f.write(code)
 
     if "created_files" not in state:
         state["created_files"] = []
