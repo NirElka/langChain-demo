@@ -670,7 +670,7 @@ def write_file(state) -> str:
 
     file_name = state['next_step_args']['file_name']
     file_content = state['next_step_args']['file_content']
-    if file_content.startswith("<result_from_"):
+    if file_content.startswith("<"):
        file_content = state.get("program_output", file_content)
 
 
