@@ -431,14 +431,12 @@ def generate_analysis_program(state) -> str:
     # 2) Build a small code snippet that sets a global variable `csv_content`
     #    in the final script. We'll rely on the LLM's code to reference csv_content
     injection_snippet = f"""
-    # --INJECTED BY PIPELINE--
-    if __name__ == "__main__":
-        csv_content = \"\"\"{csv_content}\"\"\"
-        students_txt_str = \"\"\"{students_text}\"\"\"
-        # We'll define a global variable for the script to pick up:
-        globals()['csv_content'] = csv_content
-        globals()["students_txt_str"] = students_txt_str
-    """
+# --INJECTED BY PIPELINE--
+csv_content = \"\"\"{csv_content}\"\"\"
+students_txt_str = \"\"\"{students_text}\"\"\"
+globals()["csv_content"] = csv_content
+globals()["students_txt_str"] = students_txt_str
+"""
     # 3) Combine the LLM-generated code with our snippet
     combined_code = code + "\\n" + injection_snippet
 
