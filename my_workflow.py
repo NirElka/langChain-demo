@@ -345,12 +345,140 @@ def clean_code(code_str: str) -> str:
         return code_str.strip()
     
 
+# def generate_analysis_program(state) -> str:
+#     name = "generate_analysis_program"
+#     log(state, f'**Entering agent {name}**')
+#     state['func_invocation'] += 1
+
+#     # Parse args from state
+#     args = state['next_step_args']
+#     analysis_request = args['analysis_request']
+#     input_file = args['input_file']
+#     columns = args['columns']
+#     row_example = args['row_example']
+#     output_file = args['python_file']
+#     output_format = args['output_format']
+
+#     # Log parameters
+#     params = ["analysis_request", "input_file", "columns", "row_example", "output_file", "output_format"]
+#     params_values = [analysis_request, input_file, columns, row_example, output_file, output_format]
+#     log_param(state, params, params_values)
+    
+#     # Create a prompt template
+#     # prompt_template = """
+#     # I want you to write me a Python script that analyses data from a file.
+
+#     # The file I want the script to analyze is called {input_file}.
+#     # It is a `.csv` file with the following columns: {columns}.
+#     # For example, the row of data (after the column names row): {row_example}.
+
+#     # Here is the instructions for the analysis itself.
+#     # Your Python script should reflect these requirements:
+#     # {analysis_request}
+#     # The desired output format is {output_format}.
+#     # The last line of your code should be printing the results
+
+#     # The Python script should be saved in {output_file}
+#     # """
+#     prompt_template = """
+#     You have two strings in memory, `csv_content` for the CSV data (grades.csv), and
+#     `students_txt_str` for the text data (students.txt). **Do NOT** open these files from disk.
+
+#     Instead, parse them from these two variables. For example, use Python's `csv` or
+#     `pandas` with an in-memory buffer (e.g. `io.StringIO`) for `csv_content`, and just
+#     split or read lines from `students_txt_str`.
+
+#     Your task:
+#     - Columns in the CSV: {columns}
+#     - Example row: {row_example}
+#     - Analysis requirements: {analysis_request}
+#     - Output format: {output_format}
+#     - The script's name: {output_file}
+
+#     At the end, print(...) the final result. Again, do NOT open any physical file on disk.
+#     Use the two in-memory variables:
+#     1) csv_content for the CSV
+#     2) students_txt_str for the text file
+#     """
+
+#     # Create a prompt
+#     prompt = prompt_template.format(
+#         analysis_request=analysis_request,
+#         input_file=input_file,
+#         columns=columns,
+#         row_example=row_example,
+#         output_file=output_file,
+#         output_format=output_format
+#     )
+
+#     # Query GPT
+#     response = llm(prompt)
+
+#     code = clean_code(response)
+#     import re
+#     code_no_hardcoded = re.sub(r'csv_content\s*=\s*""".*?"""', '', code, flags=re.DOTALL)
+#     code_no_hardcoded = re.sub(r'students_txt_str\s*=\s*""".*?"""', '', code_no_hardcoded, flags=re.DOTALL)
+
+#     csv_content = ""
+#     students_text = ""
+
+#     for (r_name, r_desc, r_data) in state["resources"]:
+#        if r_name == input_file:  # input_file is "grades.csv" or whatever the pipeline decided
+#           csv_content = r_data
+#        elif r_name == "students.txt":
+#           students_text = r_data
+       
+       
+#           break
+#     # 2) Build a small code snippet that sets a global variable `csv_content`
+#     #    in the final script. We'll rely on the LLM's code to reference csv_content
+#     injection_snippet = f"""
+# # --INJECTED BY PIPELINE--
+# csv_content = \"\"\"{csv_content}\"\"\"
+# students_txt_str = \"\"\"{students_text}\"\"\"
+# globals()["csv_content"] = csv_content
+# globals()["students_txt_str"] = students_txt_str
+# """
+#     # 3) Combine the LLM-generated code with our snippet
+#     combined_code = code_no_hardcoded + "\\n" + injection_snippet
+
+
+#     # 4) Write combined_code to the output_file instead of the raw code
+#     with open(output_file, 'w') as f:
+#        f.write(combined_code)
+       
+#     log(state, combined_code)
+
+
+   
+
+
+#     # # Save Python file
+#     # with open(output_file, 'w') as f:
+#     #   f.write(code)
+
+#     if "created_files" not in state:
+#         state["created_files"] = []
+#     state["created_files"].append(output_file)
+  
+#     # Verify saved file content
+#     with open(output_file, 'r') as f:
+#         saved_code = f.read()
+
+#     step = f"""
+#     Created a python program that analyzes {input_file}.
+#     The program does {analysis_request}
+#     Output of this program is saved in {output_file}
+#     """
+#     state['past_steps'].append(step)
+
+#     log(state, f'**Leaving agent {name}**')
+#     return state
 def generate_analysis_program(state) -> str:
     name = "generate_analysis_program"
     log(state, f'**Entering agent {name}**')
     state['func_invocation'] += 1
 
-    # Parse args from state
     args = state['next_step_args']
     analysis_request = args['analysis_request']
     input_file = args['input_file']
@@ -363,45 +491,22 @@ def generate_analysis_program(state) -> str:
     params = ["analysis_request", "input_file", "columns", "row_example", "output_file", "output_format"]
     params_values = [analysis_request, input_file, columns, row_example, output_file, output_format]
     log_param(state, params, params_values)
-    
-    # Create a prompt template
-    # prompt_template = """
-    # I want you to write me a Python script that analyses data from a file.
 
-    # The file I want the script to analyze is called {input_file}.
-    # It is a `.csv` file with the following columns: {columns}.
-    # For example, the row of data (after the column names row): {row_example}.
-
-    # Here is the instructions for the analysis itself.
-    # Your Python script should reflect these requirements:
-    # {analysis_request}
-    # The desired output format is {output_format}.
-    # The last line of your code should be printing the results
-
-    # The Python script should be saved in {output_file}
-    # """
+    # Prompt for the LLM
     prompt_template = """
-    You have two strings in memory, `csv_content` for the CSV data (grades.csv), and
-    `students_txt_str` for the text data (students.txt). **Do NOT** open these files from disk.
+You have two strings in memory, `csv_content` for "grades.csv", and
+`students_txt_str` for "students.txt". **DO NOT** open these files from disk.
+Use them from memory (StringIO, etc.).
 
-    Instead, parse them from these two variables. For example, use Python's `csv` or
-    `pandas` with an in-memory buffer (e.g. `io.StringIO`) for `csv_content`, and just
-    split or read lines from `students_txt_str`.
+Task:
+- CSV columns: {columns}
+- Example row: {row_example}
+- Analysis: {analysis_request}
+- Output format: {output_format}
+- Python script name: {output_file}
 
-    Your task:
-    - Columns in the CSV: {columns}
-    - Example row: {row_example}
-    - Analysis requirements: {analysis_request}
-    - Output format: {output_format}
-    - The script's name: {output_file}
-
-    At the end, print(...) the final result. Again, do NOT open any physical file on disk.
-    Use the two in-memory variables:
-    1) csv_content for the CSV
-    2) students_txt_str for the text file
-    """
-
-    # Create a prompt
+Print the final result as JSON. Do not read any real file from disk.
+"""
     prompt = prompt_template.format(
         analysis_request=analysis_request,
         input_file=input_file,
@@ -411,69 +516,67 @@ def generate_analysis_program(state) -> str:
         output_format=output_format
     )
 
-    # Query GPT
+    # 1) Query the LLM
     response = llm(prompt)
+    original_code = clean_code(response)
 
-    code = clean_code(response)
+    # 2) Remove references to csv_content/students_txt_str or if __name__ from LLM code
     import re
-    code_no_hardcoded = re.sub(r'csv_content\s*=\s*""".*?"""', '', code, flags=re.DOTALL)
-    code_no_hardcoded = re.sub(r'students_txt_str\s*=\s*""".*?"""', '', code_no_hardcoded, flags=re.DOTALL)
+    # Remove lines like: csv_content = """...""" or students_txt_str = """..."""
+    no_hardcoded = re.sub(
+        r'(?m)^\s*(csv_content|students_txt_str)\s*=\s*""".*?"""',
+        '',
+        original_code,
+        flags=re.DOTALL
+    )
+    # Remove any `if __name__ == "__main__":` block entirely, 
+    # in case the LLM code tries to run main() before our snippet
+    no_main_block = re.sub(
+        r'(?s)if\s+__name__\s*==\s*[\'"]__main__[\'"]\s*:\s*.*?(?=$)',
+        '',
+        no_hardcoded
+    )
 
-    csv_content = ""
-    students_text = ""
-
+    # 3) Gather real CSV + TXT from pipeline
+    csv_mem = ""
+    txt_mem = ""
     for (r_name, r_desc, r_data) in state["resources"]:
-       if r_name == input_file:  # input_file is "grades.csv" or whatever the pipeline decided
-          csv_content = r_data
-       elif r_name == "students.txt":
-          students_text = r_data
-       
-       
-          break
-    # 2) Build a small code snippet that sets a global variable `csv_content`
-    #    in the final script. We'll rely on the LLM's code to reference csv_content
-    injection_snippet = f"""
-# --INJECTED BY PIPELINE--
-csv_content = \"\"\"{csv_content}\"\"\"
-students_txt_str = \"\"\"{students_text}\"\"\"
+        if r_name == "grades.csv":
+            csv_mem = r_data
+        elif r_name == "students.txt":
+            txt_mem = r_data
+
+    # 4) Create snippet that sets them at the TOP (before any code tries to use them)
+    snippet = f"""# --INJECTED BY PIPELINE (TOP LEVEL)--
+csv_content = \"\"\"{csv_mem}\"\"\"
+students_txt_str = \"\"\"{txt_mem}\"\"\"
 globals()["csv_content"] = csv_content
 globals()["students_txt_str"] = students_txt_str
+
 """
-    # 3) Combine the LLM-generated code with our snippet
-    combined_code = code_no_hardcoded + "\\n" + injection_snippet
 
+    # 5) Combine: snippet first, then the rest of the code
+    final_code = snippet + "\n" + no_main_block
 
-    # 4) Write combined_code to the output_file instead of the raw code
-    with open(output_file, 'w') as f:
-       f.write(combined_code)
-       
-    log(state, combined_code)
+    # 6) Write final code to output file
+    with open(output_file, 'w', encoding="utf-8") as f:
+        f.write(final_code)
 
-
-   
-
-
-    # # Save Python file
-    # with open(output_file, 'w') as f:
-    #   f.write(code)
+    log(state, final_code)
 
     if "created_files" not in state:
         state["created_files"] = []
     state["created_files"].append(output_file)
-  
-    # Verify saved file content
-    with open(output_file, 'r') as f:
+
+    # optional verify
+    with open(output_file, 'r', encoding="utf-8") as f:
         saved_code = f.read()
 
-    step = f"""
-    Created a python program that analyzes {input_file}.
-    The program does {analysis_request}
-    Output of this program is saved in {output_file}
-    """
+    step = f"Created a python program for {input_file} -> {output_file}"
     state['past_steps'].append(step)
-
     log(state, f'**Leaving agent {name}**')
     return state
+
 def execute_Python_program(state) -> str:
     name = "execute_Python_program"
     log(state, f'**Entering agent {name}**')
