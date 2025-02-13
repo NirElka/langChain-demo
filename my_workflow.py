@@ -415,7 +415,9 @@ def generate_analysis_program(state) -> str:
     response = llm(prompt)
 
     code = clean_code(response)
-
+    import re
+    code_no_hardcoded = re.sub(r'csv_content\s*=\s*""".*?"""', '', code, flags=re.DOTALL)
+    code_no_hardcoded = re.sub(r'students_txt_str\s*=\s*""".*?"""', '', code_no_hardcoded, flags=re.DOTALL)
 
     csv_content = ""
     students_text = ""
@@ -438,7 +440,7 @@ globals()["csv_content"] = csv_content
 globals()["students_txt_str"] = students_txt_str
 """
     # 3) Combine the LLM-generated code with our snippet
-    combined_code = code + "\\n" + injection_snippet
+    combined_code = code_no_hardcoded + "\\n" + injection_snippet
 
 
     # 4) Write combined_code to the output_file instead of the raw code
