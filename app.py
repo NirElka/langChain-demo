@@ -7,7 +7,7 @@ st.markdown(
     <style>
     /* Target the disabled text areas and force normal look. */
     textarea[disabled]
-     textarea[disabled] * {
+      {
         background-color: #00000000 !important;  /* background color */
         color: #fafafa !important;             /* text color */
         cursor: text !important;               /* show normal text cursor */
