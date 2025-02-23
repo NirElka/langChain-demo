@@ -8,7 +8,7 @@ st.markdown(
     /* Target the disabled text areas and force normal look. */
     textarea[disabled] {
         background-color: #00000000 !important;  /* background color */
-        color: #ffffff !important;             /* text color */
+        color: #fafafa !important;             /* text color */
         cursor: text !important;               /* show normal text cursor */
         opacity: 1 !important;                 /* remove the “faded” look */
     }
