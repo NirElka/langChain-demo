@@ -100,9 +100,10 @@ def main():
 
     default_json_str = json.dumps(default_json, indent=4)
     user_json_str = st.text_area(
-        "Edit your input JSON here (for input.json):",
+        "View input JSON:",
         value=default_json_str,
-        height=200
+        height=200,
+        disabled=True
     )
 
     # --------------------------------------------
@@ -111,19 +112,11 @@ def main():
 
     st.subheader("Resource Files")
     st.write(
-        "Here you can view or edit the content of `grades.csv` or `students.txt`."
-        "If you choose to edit them, Don't forget to edit the `input.json` accordingly."
+        "Here you can view the content of `grades.csv` or `students.txt`."
     )
 
-    selected_resource = st.selectbox("Pick a resource file to load:", RESOURCE_FILES)
+    selected_resource = st.selectbox("Pick a resource file to view:", RESOURCE_FILES)
 
-    # default_resource_content = ""
-    # if os.path.exists(selected_resource):
-    #     with open(selected_resource, "r", encoding="utf-8") as f:
-    #         default_resource_content = f.read()
-    # else:
-    #     default_resource_content = f"{selected_resource} not found."
-    
     default_resource_content = ""
     # First check if we have a session-based edit saved
     if selected_resource in st.session_state["file_contents"]:
@@ -141,14 +134,15 @@ def main():
 
     
     edited_resource_content = st.text_area(
-        label=f"Edit the content of {selected_resource}:",
+        label=f"View the content of {selected_resource}:",
         value=default_resource_content,
-        height=200
+        height=200,
+        disabled=True
     )
 
-    if st.button("Save Resource File"):
-        st.session_state["file_contents"][selected_resource] = edited_resource_content
-        st.success(f"Saved changes to {selected_resource} (session-only).")
+    # if st.button("Save Resource File"):
+    #     st.session_state["file_contents"][selected_resource] = edited_resource_content
+    #     st.success(f"Saved changes to {selected_resource} (session-only).")
 
     # --------------------------------------------
     # 4) Run the pipeline
