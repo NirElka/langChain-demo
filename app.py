@@ -2,6 +2,22 @@ import streamlit as st
 import json
 import os
 from my_workflow import run_pipeline
+st.markdown(
+    """
+    <style>
+    /* Target the disabled text areas and force normal look. */
+    textarea[disabled] {
+        background-color: #0e1117 !important;  /* background color */
+        color: #ffffff !important;             /* text color */
+        cursor: text !important;               /* show normal text cursor */
+        opacity: 1 !important;                 /* remove the “faded” look */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 
 # A list of the possible query files we have:
 AVAILABLE_QUERIES = ["query1.txt", "query2.txt", "query3.txt", "query4.txt"]
