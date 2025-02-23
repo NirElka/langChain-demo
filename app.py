@@ -9,7 +9,6 @@ st.markdown(
     textarea[disabled] {
         background-color: #0e1117 !important;  /* background color */
         color: #ffffff !important;             /* text color */
-        border: 1px solid rgba(250, 250, 250, 0.2) !important; matching the query box border */
         cursor: text !important;               /* show normal text cursor */
         opacity: 1 !important;                 /* remove the “faded” look */
     }
