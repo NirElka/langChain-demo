@@ -1,3 +1,8 @@
-Shalom Levi wants to become a doctor. His favorite city is Tel Aviv and his hobby is playing chess.
-Nitzi Matok loves Eilat. Her hobby is scuba diving.
-Chava Bina hopes to become an entrepreneur. She would like to live in Haifa. For a hobby, she does crossword puzzles.
+Shalom Levi is a third-year student aspiring to become a mathematician. His favorite city is Tokyo. Hobbies include reading graphic novels and hiking.
+Sarah Connor is a second-year student who loves AI research. She enjoys visiting Berlin for its tech scene. She also practices karate.
+James Smith is a first-year student focusing on physics. He hopes to join NASA. Favorite city is New York. Hobbies: painting and swimming.
+Rita Hayworth is a fourth-year Statistics major, aiming for a career in data science. She adores London. She does cross-fit and photography in her free time.
+Ido Cohen is a second-year computing student, dreaming to be a security specialist. He loves Tel Aviv. Hobbies: coding and yoga.
+Dana Levi is a third-year English major, hoping to become a journalist. Her favorite city is Paris. She engages in blogging and crocheting on weekends.
+Michael Green is a first-year mechanical engineering student who wants to design sustainable vehicles. He has a soft spot for Toronto. He plays the guitar and collects vintage postcards.
+Ashley Brown is a second-year biology student determined to research new vaccines. She loves Rome. Her hobbies include baking and rock climbing.
