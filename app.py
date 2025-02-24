@@ -126,12 +126,6 @@ def main():
             height=200,
             disabled=True  # Ensures the user can't edit it
     )
-    user_json_str = st.text_area(
-        "View input JSON:",
-        value=default_json_str,
-        height=200,
-        disabled=True
-    )
 
     # --------------------------------------------
     # 3) Let the user view/edit resource files too
