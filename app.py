@@ -119,6 +119,13 @@ def main():
     }
 
     default_json_str = json.dumps(default_json, indent=4)
+    with st.expander("Show input.json (read-only)", expanded=False):
+        user_json_str = st.text_area(
+            "input.json (read-only)",
+            value=default_json_str,
+            height=200,
+            disabled=True  # Ensures the user can't edit it
+    )
     user_json_str = st.text_area(
         "View input JSON:",
         value=default_json_str,
