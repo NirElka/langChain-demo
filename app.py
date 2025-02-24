@@ -6,7 +6,7 @@ st.markdown(
     """
     <style>
     /* Target the disabled text areas and force normal look. */
-    textarea[disabled],
+    textarea:disabled,
     textarea[disabled],
     textarea[disabled] *
       {
