@@ -1,8 +1,8 @@
-Shalom Levi is a third-year student aspiring to become a mathematician. His favorite city is Tokyo. Hobbies include reading graphic novels and hiking.
-Sarah Connor is a second-year student who loves AI research. She enjoys visiting Berlin for its tech scene. She also practices karate.
-James Smith is a first-year student focusing on physics. He hopes to join NASA. Favorite city is New York. Hobbies: painting and swimming.
+Shalom Levi is a third-year student aspiring to become a mathematician. His favorite city is Tokyo. His hobbies include reading graphic novels and hiking.
+Sarah Connor is a second-year student who loves AI research. She enjoys visiting Berlin for its tech scene.
+James Smith is a first-year student focusing on physics. He hopes to join NASA. Favorite city is New York. His hobbies include painting and swimming.
 Rita Hayworth is a fourth-year Statistics major, aiming for a career in data science. She adores London. She does cross-fit and photography in her free time.
-Ido Cohen is a second-year computing student, dreaming to be a security specialist. He loves Tel Aviv. Hobbies: coding and yoga.
+Ido Cohen is a second-year computing student, dreaming to be a security specialist. He loves Tel Aviv. His hobbies are coding and yoga.
 Dana Levi is a third-year English major, hoping to become a journalist. Her favorite city is Paris. She engages in blogging and crocheting on weekends.
-Michael Green is a first-year mechanical engineering student who wants to design sustainable vehicles. He has a soft spot for Toronto. He plays the guitar and collects vintage postcards.
+Michael Green is a first-year mechanical engineering student who wants to design sustainable vehicles. He has a soft spot for Havana. He plays the guitar and collects vintage postcards.
 Ashley Brown is a second-year biology student determined to research new vaccines. She loves Rome. Her hobbies include baking and rock climbing.
