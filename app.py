@@ -12,6 +12,7 @@ st.markdown(
       {
         background-color: #00000000 !important;  /* background color */
         color: #fafafa !important;             /* text color */
+        -webkit-text-fill-color: #fafafa !important; /* Chrome-based browsers fix */
         cursor: text !important;               /* show normal text cursor */
         opacity: 1 !important;                 /* remove the “faded” look */
     }
