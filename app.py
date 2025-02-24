@@ -48,7 +48,7 @@ def main():
 
         This application demonstrates a **multi-step, agent-based system** powered by [LangChain](https://github.com/hwchase17/langchain). 
         Each *query* file (e.g., `query1.txt`) contains **instructions** or a **prompt** that the pipeline will interpret. 
-        Behind the scenes, the system uses an **LLM** and other tools to **plan** which "tool" or function to call next, it can, among other things:
+        Behind the scenes, the system uses an **LLM** and other tools to **plan** which "tool" or function to call next, it can, for example:
         - Generate Python code to analyze a CSV file, 
         - Execute that code and capture the result, 
         - Perform text analysis on files, 
@@ -58,14 +58,14 @@ def main():
         **How to use this app**:
         1. **Pick** one of the available query files from the dropdown.
         2. **View or edit** the query file’s text in the text area (press "Save Query File" to confirm changes).
-        3. (Optional) **Edit** the input JSON below if you want to change the contents of files the pipeline can access.
+        3. **Review** the input JSON and other resource files for context.
         4. Click **"Run Pipeline"** to see how the LLM decides to handle the query. The logs and final state are shown in a collapsible 
            section, and any newly created or modified files will appear below.
-        5. Duo to the fact that we are constantly generating new code, the pipeline may not always produce a perfect result.
-           In that case, give it another shot and try to run the pipeline again.
+        5. Because we dynamically generate new code on the fly, the pipeline may not always produce a perfect result.
+           Feel free to click "Run Pipeline" again if the output is unexpected.
 
-        *Note: All changes you make happen only in your current session, so feel free to experiment!*
-        """,
+        *Note: All edits and new files occur only within your current session, so you can safely experiment!*
+         """,
         unsafe_allow_html=True
     )
 
