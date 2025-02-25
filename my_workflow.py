@@ -103,22 +103,6 @@ class QueryParser:
         return Query(query_name, query_content)
 
 
-  # def parse_query_name(self, input_data):
-  #   # Parse query name. Appears in the exercise in two different ways.
-  #   for key in ('query-name', 'query_name'):
-  #     if key in input_data:
-  #       return input_data[key]
-  #   raise KeyError("Could not find the query name")
-
-  # def parse_query_content(self, query_path):
-  #   with open(query_path) as f:
-  #     return f.read()
-
-  # def parse_query(self, input_data):
-  #   query_name = self.parse_query_name(input_data)
-  #   query_content = self.parse_query_content(query_name)
-  #   return Query(query_name, query_content)
-
 
 class ResourcesParser:
 
@@ -161,15 +145,6 @@ class ResourcesParser:
          res.set_content("")
                  
 
-    # for res in resources:
-    #   with open(res.name) as f:
-    #     if res.name.endswith('csv'):
-    #       df = pd.read_csv(f)
-    #       res.set_content(f)
-    #       columns_index = json.dumps({column: i for i, column in enumerate(list(df.columns))})
-    #       res.description += columns_index
-    #     else:
-    #       res.set_content(f.read())
 
   def parse_resources(self, input_data):
     resources = [self.parse_resource(res) for res in input_data['file_resources']]
@@ -318,14 +293,12 @@ def plan(state):
     response = llm(prompt)
     state['llm_invocations'] += 1
 
-    # parsed_response = json.loads(response)
     # Post-process response to remove possible code fences
     # Strip whitespace
     # Clean and extract JSON
     response = response.strip().replace("```json", "").replace("```", "").strip("`").strip()
     json_match = re.search(r'\{.*\}', response, re.DOTALL)
     # Remove surrounding triple backticks and 'json' hint if present
-    # response = response.replace("```json", "").replace("```", "").strip("`").strip()
 
     # Check if the response is valid JSON before parsing
     if json_match:
@@ -479,7 +452,7 @@ def execute_Python_program(state) -> str:
   
       log(state, SUCCESS_MSG)
 
-      with open(output_fn, 'w') as f:  # We are requested to implement a function that writes to a file. Should probably use that one instaeed of do it here.
+      with open(output_fn, 'w') as f:  
         f.write(results)
 
       if "created_files" not in state:

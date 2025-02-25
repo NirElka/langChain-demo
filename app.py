@@ -26,7 +26,7 @@ st.markdown(
 # A list of the possible query files we have:
 AVAILABLE_QUERIES = ["query1.txt", "query2.txt", "query3.txt", "query4.txt"]
 
-# A list of our two resource files that we allow editing
+# A list of our two resource files 
 RESOURCE_FILES = ["grades.csv", "students.txt"]
 
 def main():
@@ -128,7 +128,7 @@ def main():
     )
 
     # --------------------------------------------
-    # 3) Let the user view/edit resource files too
+    # 3) Let the user view resource files too
     # --------------------------------------------
 
     st.subheader("Resource Files")
@@ -160,10 +160,6 @@ def main():
         height=200,
         disabled=True
     )
-
-    # if st.button("Save Resource File"):
-    #     st.session_state["file_contents"][selected_resource] = edited_resource_content
-    #     st.success(f"Saved changes to {selected_resource} (session-only).")
 
     # --------------------------------------------
     # 4) Run the pipeline
