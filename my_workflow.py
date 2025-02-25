@@ -261,6 +261,12 @@ def plan(state):
 
     The steps we did so far:
     {past_steps}
+    Important guidelines:
+    - **Always check local files** (grades.csv, students.txt, etc.) for relevant data.
+    - **Only** use WebSearch if the local files do **not** have the needed information or the query explicitly requires external knowledge.
+    - **Do not guess**. If you can confirm an answer from local data, do so.
+    - Output your response as valid JSON with the structure:
+     {"tool": "<ToolName>", "args": {...}}
     """
 
     # Formatting previous steps
