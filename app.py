@@ -31,10 +31,6 @@ RESOURCE_FILES = ["grades.csv", "students.txt"]
 
 def main():
     # Show the deployed commit hash for debugging
-    if os.path.exists("version.txt"):
-        with open("version.txt", "r", encoding="utf-8-sig") as f:
-            commit_hash = f.read().strip()
-        st.info(f"**Deployed commit:** {commit_hash}")
 
     if "file_contents" not in st.session_state:
         st.session_state["file_contents"] = {}
