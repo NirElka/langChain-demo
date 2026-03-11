@@ -34,15 +34,15 @@ def llm(query):
 
   for i in range(max_retries):
     try:
-      response = model.invoke(query)
-      return response.content
-    except openai.error.RateLimitError as e:
-      if i < max_retries - 1:
-        print(f"Rate limit error, retrying in {retry_delay} seconds...")
-        time.sleep(retry_delay)
-        retry_delay *= 2  # Exponential backoff
-      else:
-        raise e  # Raise the exception if max retries reached
+        response = model.invoke(query)
+        return response.content
+    except Exception as e:
+        if i < max_retries - 1:
+            print(f"Error occurred: {e}. Retrying in {retry_delay} seconds...")
+            time.sleep(retry_delay)
+            retry_delay *= 2  # Exponential backoff
+        else:
+            raise e  # Raise the exception if max retries reached
 
 
 @dataclass
